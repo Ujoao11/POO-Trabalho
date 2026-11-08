@@ -3,26 +3,54 @@ import java.util.List;
 
 
 interface Alugar {
-    public 
+    boolean possuiPendenciasFinanceiras();
+    
+    boolean temCadastroRegular();
+    
+    default boolean podeAlugar() {
+        return !possuiPendenciasFinanceiras() && temCadastroRegular();
+    }
+    
+    double AdicionarValorAluguel(double valor);
+    
 }
 
-class Cliente {
+class Cliente implements Alugar {
     private String telefone;
     private String email;
     private String nome;
+    private String documento;
     private boolean inadimplente;
     private boolean cadastroRegular; 
     private double aluguel;
     
-    public Cliente(String telefone, String email, String nome) {
+    public Cliente(String telefone, String email, String nome, String documento) {
         this.telefone = telefone;
         this.email = email;
         this.nome = nome;
+        this.documento = documento;
     }
     
     public void exibirContato() {
+        System.out.println("Cliente: " + nome);
         System.out.println("O número do Cliente é: " + telefone);
         System.out.println("O e-mail do Cliente é: " + email);
+        System.out.println("O documento do Cliente é: " + documento);
+    }
+    
+    @Override
+    public boolean possuiPendenciasFinanceiras() {
+        return this.inadimplente;
+    }
+
+    @Override
+    public boolean temCadastroRegular() {
+        return this.cadastroRegular;
+    }
+    
+    @Override
+    public double AdicionarValorAluguel(double valor) {
+        return aluguel = valor;
     }
 }
 
@@ -61,12 +89,12 @@ class Estoque {
 }
 
 abstract class Item {
-    private double qtd;
-    private String ID;
-    private String nome;
-    private String SI;
-    private String marca;
-    private Cliente cliente;
+    protected double qtd;
+    protected String ID;
+    protected String nome;
+    protected String SI;
+    protected String marca;
+    protected Cliente cliente;
     
     public Item(double qtd, String ID, String nome, String SI, String marca, Cliente cliente) {
         this.qtd = qtd;
@@ -78,10 +106,10 @@ abstract class Item {
     }
     
     protected void exibirBase() {
-        System.out.println("ID: " + id);
+        System.out.println("ID: " + ID);
         System.out.println("Nome: " + nome);
         System.out.println("Marca: " + marca);
-        System.out.println("Qtd: " + qtd + " " + si);
+        System.out.println("Qtd: " + qtd + " " + SI);
     }
     
     public abstract void exibirDetalhes();
@@ -107,8 +135,8 @@ class Equipamento extends Item {
     private String garantia;
     private String numeroDeSerie;
 
-    public Equipamento(double qtd, String id, String nome, String si, String marca, String precisao, String garantia, String numeroDeSerie) {
-        super(preco, qtd, id, nome, si, marca);
+    public Equipamento(double qtd, String id, String nome, String si, String marca, Cliente cliente, String precisao, String garantia, String numeroDeSerie) {
+        super(qtd, id, nome, si, marca, cliente);
         this.precisao = precisao;
         this.garantia = garantia;
         this.numeroDeSerie = numeroDeSerie;
@@ -128,8 +156,8 @@ class Iluminacao extends Item {
     private String corTemperatura;
     private double tensao;
 
-    public Iluminacao(double qtd, String id, String nome, String si, String marca, double potencia, String corTemperatura, double tensao) {
-        super(preco, qtd, id, nome, si, marca);
+    public Iluminacao(double qtd, String id, String nome, String si, String marca, Cliente cliente, double potencia, String corTemperatura, double tensao) {
+        super(qtd, id, nome, si, marca, cliente);
         this.potencia = potencia;
         this.corTemperatura = corTemperatura;
         this.tensao = tensao;
@@ -149,8 +177,8 @@ class ProtecaoComando extends Item {
     private String curva;
     private int polos;
 
-    public ProtecaoComando(double qtd, String id, String nome, String si, String marca, double corrente, String curva, int polos) {
-        super(preco, qtd, id, nome, si, marca);
+    public ProtecaoComando(double qtd, String id, String nome, String si, String marca, Cliente cliente, double corrente, String curva, int polos) {
+        super(qtd, id, nome, si, marca, cliente);
         this.corrente = corrente;
         this.curva = curva;
         this.polos = polos;
@@ -170,8 +198,8 @@ class Cabos extends Item {
     private String tipo;
     private String cor;
 
-    public Cabos(double qtd, String id, String nome, String si, String marca, double secao, String tipo, String cor) {
-        super(preco, qtd, id, nome, si, marca);
+    public Cabos(double qtd, String id, String nome, String si, String marca, Cliente cliente, double secao, String tipo, String cor) {
+        super(qtd, id, nome, si, marca, cliente);
         this.secao = secao;
         this.tipo = tipo;
         this.cor = cor;
@@ -191,8 +219,8 @@ class Passagem extends Item {
     private String material;
     private String tipo;
 
-    public Passagem(double qtd, String id, String nome, String si, String marca, double diametro, String material, String tipo) {
-        super(preco, qtd, id, nome, si, marca);
+    public Passagem(double qtd, String id, String nome, String si, String marca, Cliente cliente, double diametro, String material, String tipo) {
+        super(qtd, id, nome, si, marca, cliente);
         this.diametro = diametro;
         this.material = material;
         this.tipo = tipo;
@@ -211,8 +239,8 @@ class Acabamento extends Item {
     private String design;
     private double corrente;
 
-    public Acabamento(double qtd, String id, String nome, String si, String marca, String design, double corrente) {
-        super(preco, qtd, id, nome, si, marca);
+    public Acabamento(double qtd, String id, String nome, String si, String marca, Cliente cliente, String design, double corrente) {
+        super(qtd, id, nome, si, marca, cliente);
         this.design = design;
         this.corrente = corrente;
     }
@@ -225,16 +253,8 @@ class Acabamento extends Item {
     }
 }
 
-public class Main {
+class Main {
     public static void main(String[] args) {
-        Iluminacao lampada = new Iluminacao(10, "1", "Lâmpada LED", "UN", "Philips", 9.0, "Branca fria", 127);
-        Cabos cabo = new Cabos(100, "2", "Cabo flexível", "M", "Sil", 2.5, "Flexível", "Azul");
-        Acabamento tomada = new Acabamento(30, "3", "Tomada 2P+T", "UN", "Tramontina", "Branco", 10);
-
-        lampada.exibirDetalhes();
-        System.out.println();
-        cabo.exibirDetalhes();
-        System.out.println();
-        tomada.exibirDetalhes();
+        
     }
 }
